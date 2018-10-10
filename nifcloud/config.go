@@ -35,7 +35,7 @@ func (c *Config) Client() (interface{}, error) {
 
 	sess := session.Must(session.NewSession(&nifcloud.Config{
 		Region:      nifcloud.String(c.Region),
-		Credentials: credentials.NewEnvCredentials(),
+		Credentials: credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, ""),
 	}))
 
 	var client NifcloudClient

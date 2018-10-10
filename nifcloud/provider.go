@@ -22,12 +22,8 @@ func Provider() terraform.ResourceProvider {
 				Description: "The secret key for API operations.",
 			},
 			"region": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"AWS_REGION",
-					"AWS_DEFAULT_REGION",
-				}, nil),
+				Type:        schema.TypeString,
+				Required:    true,
 				Description: "The region where Nifcloud operations will take place.",
 			},
 		},

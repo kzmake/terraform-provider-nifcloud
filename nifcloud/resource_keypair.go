@@ -21,7 +21,6 @@ func resourceKeyPair() *schema.Resource {
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
-				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(6, 32),
 			},
