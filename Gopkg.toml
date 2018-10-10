@@ -25,10 +25,14 @@
 #   unused-packages = true
 
 
-[prune]
-  go-tests = true
-  unused-packages = true
+[[constraint]]
+  branch = "master"
+  name = "github.com/alice02/nifcloud-sdk-go"
 
 [[constraint]]
   name = "github.com/hashicorp/terraform"
   version = "0.11.8"
+
+[prune]
+  go-tests = true
+  unused-packages = true
