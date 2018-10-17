@@ -32,8 +32,8 @@ func Provider() terraform.ResourceProvider {
 			// "nifcloud_instance": dataSourceInstance(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			// "nifcloud_instance": resourceInstance(),
-			"nifcloud_keypair": resourceKeyPair(),
+			"nifcloud_instance": resourceInstance(),
+			"nifcloud_keypair":  resourceKeyPair(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
