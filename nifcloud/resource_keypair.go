@@ -18,17 +18,17 @@ func resourceKeyPair() *schema.Resource {
 		Update: resourceKeyPairUpdate,
 		Delete: resourceKeyPairDelete,
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(6, 32),
 			},
-			"public_key_material": &schema.Schema{
+			"public_key_material": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(0, 40),
