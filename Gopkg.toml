@@ -27,7 +27,7 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/alice02/nifcloud-sdk-go"
+  name = "github.com/kzmake/nifcloud-sdk-go"
 
 [[constraint]]
   name = "github.com/hashicorp/terraform"
