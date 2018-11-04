@@ -2,11 +2,13 @@ package nifcloud
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/kzmake/nifcloud-sdk-go/nifcloud"
 	"github.com/kzmake/nifcloud-sdk-go/nifcloud/awserr"
 	"github.com/kzmake/nifcloud-sdk-go/service/computing"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
+	"log"
 	"time"
 )
 
@@ -16,6 +18,8 @@ func resourceInstance() *schema.Resource {
 		Read:   resourceInstanceRead,
 		Update: resourceInstanceUpdate,
 		Delete: resourceInstanceDelete,
+
+		SchemaVersion: 1,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -136,6 +140,10 @@ func resourceInstance() *schema.Resource {
 					},
 				},
 			},
+			"instance_state": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -207,7 +215,28 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error RunInstancesInput: %s", err)
 	}
-	d.SetId(*out.InstancesSet[0].InstanceId)
+	instance := out.InstancesSet[0]
+	log.Printf("[INFO] Instance ID: %s", *instance.InstanceId)
+
+	d.SetId(*instance.InstanceId)
+
+	log.Printf("[DEBUG] Waiting for instance (%s) to become running", *instance.InstanceId)
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"pending"},
+		Target:     []string{"running"},
+		Refresh:    InstanceStateRefreshFunc(meta, *instance.InstanceId, []string{"warning", "import_error", "suspending"}),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      10 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf(
+			"Error waiting for instance (%s) to become ready: %s",
+			*instance.InstanceId, err)
+	}
 
 	return resourceInstanceRead(d, meta)
 }
@@ -318,6 +347,8 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 			// only linux
 			d.Set("key_name", instance.KeyName)
 
+			//d.Set("instance_state", instance.InstanceState.Name)
+
 			for _, v := range out.ReservationSet[0].GroupSet {
 				d.Set("security_groups", v.GroupId)
 			}
@@ -327,4 +358,40 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return fmt.Errorf("Unable to find instance within: %#v", out.ReservationSet[0].InstancesSet)
+}
+
+func InstanceStateRefreshFunc(meta interface{}, instanceId string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		conn := meta.(*NifcloudClient).computingconn
+
+		input := computing.DescribeInstancesInput{
+			InstanceId: []*string{nifcloud.String(instanceId)},
+		}
+
+		out, err := conn.DescribeInstances(&input)
+
+		if err != nil {
+			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "Client.InvalidParameterNotFound.Instance" {
+				return nil, "", nil
+			} else {
+				log.Printf("Error on InstanceStateRefresh: %s", err)
+				return nil, "", err
+			}
+		}
+
+		if len(out.ReservationSet) == 0 || len(out.ReservationSet[0].InstancesSet) == 0 {
+			return nil, "", nil
+		}
+
+		instance := out.ReservationSet[0].InstancesSet[0]
+		state := *instance.InstanceState.Name
+
+		for _, failState := range failStates {
+			if state == failState {
+				return instance, state, fmt.Errorf("Failed to reach target state.")
+			}
+		}
+
+		return instance, state, nil
+	}
 }
