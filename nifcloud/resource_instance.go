@@ -60,6 +60,7 @@ func resourceInstance() *schema.Resource {
 			"instance_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"availability_zone": {
 				Type:     schema.TypeString,
