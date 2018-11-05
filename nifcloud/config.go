@@ -12,8 +12,7 @@ type Config struct {
 	AccessKey string
 	SecretKey string
 	Region    string
-
-	Ec2Endpoint string
+	Endpoint string
 }
 
 type NifcloudClient struct {
@@ -21,22 +20,27 @@ type NifcloudClient struct {
 }
 
 func (c *Config) Client() (interface{}, error) {
-	if c.AccessKey == "" {
-		return nil, fmt.Errorf("[Err] No Access key for Nifcloud")
-	}
-
-	if c.SecretKey == "" {
-		return nil, fmt.Errorf("[Err] No Secret key for Nifcloud")
-	}
-
 	if c.Region == "" {
 		return nil, fmt.Errorf("[Err] No Region Name for Nifcloud")
 	}
 
-	sess := session.Must(session.NewSession(&nifcloud.Config{
+	var credential *credentials.Credentials
+	if c.AccessKey != "" && c.SecretKey != "" {
+		credential = credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, "")
+	} else {
+		credential = credentials.NewEnvCredentials()
+	}
+
+	config := nifcloud.Config{
 		Region:      nifcloud.String(c.Region),
-		Credentials: credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, ""),
-	}))
+		Credentials: credential,
+	}
+
+	if c.Endpoint != "" {
+		config.WithEndpoint(*nifcloud.String(c.Endpoint))
+	}
+
+	sess := session.Must(session.NewSession(&config))
 
 	var client NifcloudClient
 
