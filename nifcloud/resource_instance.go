@@ -9,6 +9,7 @@ import (
 	"github.com/kzmake/nifcloud-sdk-go/nifcloud/awserr"
 	"github.com/kzmake/nifcloud-sdk-go/service/computing"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -45,12 +46,11 @@ func resourceInstance() *schema.Resource {
 				Required: true,
 			},
 			"security_groups": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Required: true,
 				MinItems: 1,
 				MaxItems: 1,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 			"user_data": {
 				Type:     schema.TypeString,
@@ -154,8 +154,8 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*NifcloudClient).computingconn
 
 	var securityGroups []*string
-	if v := d.Get("security_groups"); v != nil {
-		for _, v := range v.(*schema.Set).List() {
+	if sgs := d.Get("security_groups").([]interface {}); sgs != nil {
+		for _, v := range sgs {
 			securityGroups = append(securityGroups, nifcloud.String(v.(string)))
 		}
 	}
