@@ -34,7 +34,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:521cfc21291aef9e7a68d37cea41f77ecc26fd381c1b1541a7444623e7cda37e"
+  digest = "1:808bf6068d190a78e64e25b2085813fef901f039c2e23a6b3d4f0452a6637abb"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -54,6 +54,7 @@
     "aws/request",
     "aws/session",
     "aws/signer/v4",
+    "internal/ini",
     "internal/s3err",
     "internal/sdkio",
     "internal/sdkrand",
@@ -71,8 +72,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "c35fe9d06b9f0cefe538ecdb7501c84603119dfb"
-  version = "v1.15.56"
+  revision = "3264db248fe8d241f6949ed35e33b11c0aec3c93"
+  version = "v1.15.68"
 
 [[projects]]
   branch = "master"
@@ -97,6 +98,14 @@
   pruneopts = "UT"
   revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
   version = "v3.5.1"
+
+[[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
 
 [[projects]]
   digest = "1:865079840386857c809b72ce300be7580cb50d3d3129ce11bf9aa6ca2bc1934a"
@@ -127,6 +136,19 @@
   pruneopts = "UT"
   revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
   version = "v1.2.0"
+
+[[projects]]
+  digest = "1:2e3c336fc7fde5c984d2841455a658a6d626450b1754a854b3b32e7a8f49a07a"
+  name = "github.com/google/go-cmp"
+  packages = [
+    "cmp",
+    "cmp/internal/diff",
+    "cmp/internal/function",
+    "cmp/internal/value",
+  ]
+  pruneopts = "UT"
+  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
+  version = "v0.2.0"
 
 [[projects]]
   digest = "1:0ade334594e69404d80d9d323445d2297ff8161637f9b2d347cc6973d2d6f05b"
@@ -173,11 +195,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:880e48599e7f65dd85eed8092d63ebcbc73715491aec1a857adbce6d9d51d1ac"
+  digest = "1:12fd3b73c54592003bf5214e9efff0092abaa173eedfc5390ed17431ed5dde1e"
   name = "github.com/hashicorp/go-plugin"
   packages = ["."]
   pruneopts = "UT"
-  revision = "314501b665e0b2cc71bbd829783179fc38840a85"
+  revision = "54b6ff97d8180dbbd93d2010dd4a92c86f604bb8"
 
 [[projects]]
   digest = "1:605c47454db9040e30b20dc1b29e3e9d42d6ee742545729cdef74afb1b898ad0"
@@ -223,7 +245,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3eec631be552c4b129491f8d4fd7997d6e907d0c3b29937e815b9203223420d1"
+  digest = "1:0e85b7146987d600289c5bc454ddc63745e90ebc2378bbb7d7ed27034b9c0913"
   name = "github.com/hashicorp/hcl2"
   packages = [
     "gohcl",
@@ -232,9 +254,10 @@
     "hcl/json",
     "hcldec",
     "hclparse",
+    "hclwrite",
   ]
   pruneopts = "UT"
-  revision = "3e4b7e0eb20ecc20e70dbd458f7a54daf0032830"
+  revision = "917fbe66e76dffa8e62448fbda375b230657897f"
 
 [[projects]]
   branch = "master"
@@ -250,7 +273,15 @@
   revision = "fa9f258a92500514cc8e9c67020487709df92432"
 
 [[projects]]
-  digest = "1:3af3cdeedfd1633b9623694274087decf960c958bbb3910fdc85f8916a8b5fa3"
+  digest = "1:16ae35b3a854c667baaf55ff5d455c486f7c2baf040a2727f2ef0e4b096b2a95"
+  name = "github.com/hashicorp/logutils"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a335183dfd075f638afcc820c90591ca3c97eba6"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:4501df1de5bed5a87d078e633d4e9240a70a3827d64eacbf220cb47e0d7e07c8"
   name = "github.com/hashicorp/terraform"
   packages = [
     "config",
@@ -259,8 +290,11 @@
     "config/module",
     "dag",
     "flatmap",
+    "helper/config",
     "helper/hashcode",
     "helper/hilmapstructure",
+    "helper/logging",
+    "helper/resource",
     "helper/schema",
     "helper/structure",
     "helper/validation",
@@ -279,8 +313,8 @@
     "version",
   ]
   pruneopts = "UT"
-  revision = "6dfc4d748de9cda23835bc5704307ed45e839622"
-  version = "v0.11.8"
+  revision = "17850e9a55d33c43d7c31fd6ac122ba97a51d899"
+  version = "v0.11.10"
 
 [[projects]]
   branch = "master"
@@ -327,7 +361,7 @@
     "service/computing",
   ]
   pruneopts = "UT"
-  revision = "5a791276fb4038aa370e398f6fcf0d74dbe716c9"
+  revision = "92ce812c901f363629ac647779f4c0d4275f1600"
 
 [[projects]]
   digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
@@ -418,7 +452,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:963772912b1d71f582a78a3f55a0e83bbd88777335a07a57cfbe0f01df2df06b"
+  digest = "1:57e168c6dfcc02c1c53bdf1589afbef59694d819cac65bfd3a855de2256d4950"
   name = "github.com/posener/complete"
   packages = [
     ".",
@@ -427,11 +461,11 @@
     "match",
   ]
   pruneopts = "UT"
-  revision = "dcda3199365ca2a5f24aea4c42aa56f6a197d117"
-  version = "v1.1.2"
+  revision = "3ef9b31a6a0613ae832e7ecf208374027c3b2343"
+  version = "v1.2.1"
 
 [[projects]]
-  digest = "1:4aeb3860275fa1fd60cccfb5a6ef85da438bf17402e1e84412ade4d4b55066a0"
+  digest = "1:db345c377984d0907323c09a9b17f11d995a59649fd38f909727df358b5f9020"
   name = "github.com/ulikunitz/xz"
   packages = [
     ".",
@@ -440,12 +474,12 @@
     "lzma",
   ]
   pruneopts = "UT"
-  revision = "0c6b41e72360850ca4f98dc341fd999726ea007f"
-  version = "v0.5.4"
+  revision = "590df8077fbcb06ad62d7714da06c00e5dd2316d"
+  version = "v0.5.5"
 
 [[projects]]
   branch = "master"
-  digest = "1:ecc7fbde3d397eb26aa33028e133ca762f7da31f1c9a7ca86867761282913bbe"
+  digest = "1:e77fdd77613344e716e0ce6c7cc28d8f6ebf02d938fad00db4b5fa73cb3589fb"
   name = "github.com/zclconf/go-cty"
   packages = [
     "cty",
@@ -457,11 +491,11 @@
     "cty/set",
   ]
   pruneopts = "UT"
-  revision = "1f835aab79c29c842f2e8624541053e8ff618cd8"
+  revision = "01c5aba823a6c91fe3bc287fd6e493ca717a64b8"
 
 [[projects]]
   branch = "master"
-  digest = "1:fc3e1f838b92bf8686f808fb62f35e35f18f1fcfc99841c30cc189593bb6695d"
+  digest = "1:3eb69f36ea2a56248739a270b3146a5a8c396b68c7f4c342682a79f5fe8233d7"
   name = "golang.org/x/crypto"
   packages = [
     "bcrypt",
@@ -475,11 +509,11 @@
     "openpgp/s2k",
   ]
   pruneopts = "UT"
-  revision = "0c41d7ab0a0ee717d4590a44bcb987dfd9e183eb"
+  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
 
 [[projects]]
   branch = "master"
-  digest = "1:57558ae9af42770158eb5584d9466101c965cd644b01d32dd15720da0a4a0286"
+  digest = "1:d5a1ab82761bb357dcc90a5ca0f5356a573686fc37f21a51adc3830b0aa48fb6"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -493,15 +527,15 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "49bb7cea24b1df9410e1712aa6433dae904ff66a"
+  revision = "c10e9556a7bc0e7c942242b606f0acf024ad5d6a"
 
 [[projects]]
   branch = "master"
-  digest = "1:0a40b0bdd57a93e741d8557465be3a2edeec408e9b6399586ad65bbe8e355796"
+  digest = "1:35560529f5721d65f36dc23aa15fbf7306c5091cdc3f29f65881af5031b80cc8"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "fa43e7bc11baaae89f3f902b2b4d832b68234844"
+  revision = "9b800f95dbbc54abff0acf7ee32d88ba4e328c89"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -532,10 +566,10 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "94acd270e44e65579b9ee3cdab25034d33fed608"
+  revision = "c830210a61dfaa790e1920f8d0470fc27bc2efbe"
 
 [[projects]]
-  digest = "1:1b6d2676ea895d33cbd1999c75dfc8e25b103c754ccfc66dc06ae845ce3a47bc"
+  digest = "1:95550b4aa2a79019c2a832c1a7d6a5446b046e3ee8cce12a042778ac0ac47baf"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -568,13 +602,14 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "8dea3dc473e90c8179e519d91302d0597c0ca1d1"
-  version = "v1.15.0"
+  revision = "2e463a05d100327ca47ac218281906921038fd95"
+  version = "v1.16.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/hashicorp/terraform/helper/resource",
     "github.com/hashicorp/terraform/helper/schema",
     "github.com/hashicorp/terraform/helper/validation",
     "github.com/hashicorp/terraform/plugin",

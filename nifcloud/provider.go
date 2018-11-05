@@ -21,6 +21,11 @@ func Provider() terraform.ResourceProvider {
 				Default:     "",
 				Description: "The secret key for API operations.",
 			},
+			"endpoint": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The endpoint for API operations.",
+			},
 			"region": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -43,6 +48,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := &Config{
 		AccessKey: d.Get("access_key").(string),
 		SecretKey: d.Get("secret_key").(string),
+		Endpoint:    d.Get("endpoint").(string),
 		Region:    d.Get("region").(string),
 	}
 
