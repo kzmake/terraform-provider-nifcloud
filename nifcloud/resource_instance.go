@@ -47,8 +47,8 @@ func resourceInstance() *schema.Resource {
 			},
 			"security_groups": {
 				Type:     schema.TypeList,
-				Required: true,
-				MinItems: 1,
+				Optional:     true,
+				MinItems: 0,
 				MaxItems: 1,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
