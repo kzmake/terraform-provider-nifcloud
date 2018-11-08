@@ -20,7 +20,17 @@ func resourceInstance() *schema.Resource {
 		Update: resourceInstanceUpdate,
 		Delete: resourceInstanceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				conn := meta.(*NifcloudClient).computingconn
+				out, _ := conn.DescribeInstances(&computing.DescribeInstancesInput{})
+				for _, i := range out.ReservationSet[0].InstancesSet {
+					if *i.InstanceUniqueId == d.Id() {
+						d.Set("name", i.InstanceId)
+					}
+				}
+
+				return []*schema.ResourceData{d}, nil
+			},
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -31,6 +41,10 @@ func resourceInstance() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
@@ -47,7 +61,7 @@ func resourceInstance() *schema.Resource {
 			},
 			"security_groups": {
 				Type:     schema.TypeList,
-				Optional:     true,
+				Optional: true,
 				MinItems: 0,
 				MaxItems: 1,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -89,6 +103,7 @@ func resourceInstance() *schema.Resource {
 			"ip_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "static",
 			},
 			"public_ip": {
 				Type:     schema.TypeString,
@@ -154,7 +169,7 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*NifcloudClient).computingconn
 
 	var securityGroups []*string
-	if sgs := d.Get("security_groups").([]interface {}); sgs != nil {
+	if sgs := d.Get("security_groups").([]interface{}); sgs != nil {
 		for _, v := range sgs {
 			securityGroups = append(securityGroups, nifcloud.String(v.(string)))
 		}
@@ -194,7 +209,7 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	input := computing.RunInstancesInput{
-		InstanceId:            nifcloud.String(d.Get("instance_id").(string)),
+		InstanceId:            nifcloud.String(d.Get("name").(string)),
 		ImageId:               nifcloud.String(d.Get("image_id").(string)),
 		KeyName:               nifcloud.String(d.Get("key_name").(string)),
 		SecurityGroup:         securityGroups,
@@ -220,9 +235,10 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 
 	instance := out.InstancesSet[0]
 
-	log.Printf("[INFO] Instance ID: %s", *instance.InstanceId)
+	log.Printf("[INFO] Instance Id: %s", *instance.InstanceId)
 
-	d.SetId(*instance.InstanceId)
+	d.SetId(*instance.InstanceUniqueId)
+	d.Set("name", instance.InstanceId)
 
 	log.Printf("[DEBUG] Waiting for instance (%s) to become running", *instance.InstanceId)
 
@@ -248,7 +264,7 @@ func resourceInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*NifcloudClient).computingconn
 
 	stopInstancesInput := computing.StopInstancesInput{
-		InstanceId: []*string{nifcloud.String(d.Id())},
+		InstanceId: []*string{nifcloud.String(d.Get("name").(string))},
 	}
 	if _, err := conn.StopInstances(&stopInstancesInput); err != nil {
 		awsErr, ok := err.(awserr.Error)
@@ -264,7 +280,7 @@ func resourceInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	stopStateConf := &resource.StateChangeConf{
 		Pending:    []string{"pending", "running"},
 		Target:     []string{"stopped"},
-		Refresh:    InstanceStateRefreshFunc(meta, d.Id(), []string{"warning"}),
+		Refresh:    InstanceStateRefreshFunc(meta, d.Get("name").(string), []string{"warning"}),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 5 * time.Second,
@@ -276,7 +292,7 @@ func resourceInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	terminateInstancesInput := computing.TerminateInstancesInput{
-		InstanceId: []*string{nifcloud.String(d.Id())},
+		InstanceId: []*string{nifcloud.String(d.Get("name").(string))},
 	}
 	if _, err := conn.TerminateInstances(&terminateInstancesInput); err != nil {
 		return fmt.Errorf("Error TerminateInstances: %s", err)
@@ -287,7 +303,7 @@ func resourceInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	terminateStateConf := &resource.StateChangeConf{
 		Pending:    []string{"pending", "running", "stopped"},
 		Target:     []string{"terminated"},
-		Refresh:    InstanceStateRefreshFunc(meta, d.Id(), []string{"warning"}),
+		Refresh:    InstanceStateRefreshFunc(meta, d.Get("name").(string), []string{"warning"}),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 5 * time.Second,
@@ -307,7 +323,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	updateStateConf := &resource.StateChangeConf{
 		Pending:    []string{"pending"},
 		Target:     []string{"running", "stopped"},
-		Refresh:    InstanceStateRefreshFunc(meta, d.Id(), []string{"warning", "terminated"}),
+		Refresh:    InstanceStateRefreshFunc(meta, d.Get("name").(string), []string{"warning", "terminated"}),
 		Timeout:    d.Timeout(schema.TimeoutUpdate),
 		Delay:      10 * time.Second,
 		MinTimeout: 5 * time.Second,
@@ -315,7 +331,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("description") {
 		_, err := conn.ModifyInstanceAttribute(&computing.ModifyInstanceAttributeInput{
-			InstanceId: nifcloud.String(d.Id()),
+			InstanceId: nifcloud.String(d.Get("name").(string)),
 			Attribute:  nifcloud.String("description"),
 			Value:      nifcloud.String(d.Get("description").(string)),
 		})
@@ -332,7 +348,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("instance_type") {
 		_, err := conn.ModifyInstanceAttribute(&computing.ModifyInstanceAttributeInput{
-			InstanceId: nifcloud.String(d.Id()),
+			InstanceId: nifcloud.String(d.Get("name").(string)),
 			Attribute:  nifcloud.String("instanceType"),
 			Value:      nifcloud.String(d.Get("instance_type").(string)),
 		})
@@ -349,7 +365,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("disable_api_termination") {
 		_, err := conn.ModifyInstanceAttribute(&computing.ModifyInstanceAttributeInput{
-			InstanceId: nifcloud.String(d.Id()),
+			InstanceId: nifcloud.String(d.Get("name").(string)),
 			Attribute:  nifcloud.String("disableApiTermination"),
 			Value:      nifcloud.String(strconv.FormatBool(d.Get("disable_api_termination").(bool))),
 		})
@@ -364,14 +380,13 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if d.HasChange("instance_id") {
+	if d.HasChange("name") {
+		before, after := d.GetChange("name")
 		_, err := conn.ModifyInstanceAttribute(&computing.ModifyInstanceAttributeInput{
-			InstanceId: nifcloud.String(d.Id()),
+			InstanceId: nifcloud.String(before.(string)),
 			Attribute:  nifcloud.String("instanceName"),
-			Value:      nifcloud.String(d.Get("instance_id").(string)),
+			Value:      nifcloud.String(after.(string)),
 		})
-
-		d.SetId(d.Get("instance_id").(string))
 
 		if err != nil {
 			return fmt.Errorf("Error ModifyInstanceAttribute: %s", err)
@@ -380,7 +395,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		updateStateConf := &resource.StateChangeConf{
 			Pending:    []string{"pending", "terminated"},
 			Target:     []string{"running", "stopped"},
-			Refresh:    InstanceStateRefreshFunc(meta, d.Id(), []string{"warning"}),
+			Refresh:    InstanceStateRefreshFunc(meta, d.Get("name").(string), []string{"warning"}),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			Delay:      10 * time.Second,
 			MinTimeout: 5 * time.Second,
@@ -395,7 +410,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("accounting_type") {
 		_, err := conn.ModifyInstanceAttribute(&computing.ModifyInstanceAttributeInput{
-			InstanceId: nifcloud.String(d.Id()),
+			InstanceId: nifcloud.String(d.Get("name").(string)),
 			Attribute:  nifcloud.String("accountingType"),
 			Value:      nifcloud.String(d.Get("accounting_type").(string)),
 		})
@@ -412,7 +427,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("security_groups") {
 		_, err := conn.ModifyInstanceAttribute(&computing.ModifyInstanceAttributeInput{
-			InstanceId: nifcloud.String(d.Id()),
+			InstanceId: nifcloud.String(d.Get("name").(string)),
 			Attribute:  nifcloud.String("groupId"),
 			Value:      nifcloud.String(d.Get("security_groups").([]interface{})[0].(string)),
 		})
@@ -429,7 +444,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("ip_type") {
 		_, err := conn.ModifyInstanceAttribute(&computing.ModifyInstanceAttributeInput{
-			InstanceId: nifcloud.String(d.Id()),
+			InstanceId: nifcloud.String(d.Get("name").(string)),
 			Attribute:  nifcloud.String("ipType"),
 			Value:      nifcloud.String(d.Get("ip_type").(string)),
 		})
@@ -451,7 +466,7 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*NifcloudClient).computingconn
 
 	input := computing.DescribeInstancesInput{
-		InstanceId: []*string{nifcloud.String(d.Id())},
+		InstanceId: []*string{nifcloud.String(d.Get("name").(string))},
 	}
 
 	out, err := conn.DescribeInstances(&input)
@@ -504,12 +519,8 @@ func setInstanceResourceData(d *schema.ResourceData, meta interface{}, out *comp
 
 	instance := out.ReservationSet[0].InstancesSet[0]
 
-	if *instance.InstanceId != d.Id() {
-		return fmt.Errorf("Unable to find instance within: %#v", out.ReservationSet[0].InstancesSet)
-	}
-
 	outDisableApiTermination, err := conn.DescribeInstanceAttribute(&computing.DescribeInstanceAttributeInput{
-		InstanceId: nifcloud.String(d.Id()),
+		InstanceId: nifcloud.String(d.Get("name").(string)),
 		Attribute:  nifcloud.String("disableApiTermination"),
 	})
 
@@ -523,7 +534,7 @@ func setInstanceResourceData(d *schema.ResourceData, meta interface{}, out *comp
 	}
 
 	outUserData, err := conn.DescribeInstanceAttribute(&computing.DescribeInstanceAttributeInput{
-		InstanceId: nifcloud.String(d.Id()),
+		InstanceId: nifcloud.String(d.Get("name").(string)),
 		Attribute:  nifcloud.String("userData"),
 	})
 
@@ -536,14 +547,19 @@ func setInstanceResourceData(d *schema.ResourceData, meta interface{}, out *comp
 		return fmt.Errorf("Error retrieving Instance: %s", err)
 	}
 
-	d.Set("instance_id", instance.InstanceId)
+
+
+	d.Set("name", instance.InstanceId)
 	d.Set("image_id", instance.ImageId)
 	d.Set("instance_type", instance.InstanceType)
 	d.Set("accounting_type", instance.AccountingType)
 	d.Set("description", instance.Description)
 	d.Set("availability_zone", instance.Placement.AvailabilityZone)
-	d.Set("disable_api_termination", outDisableApiTermination.DisableApiTermination)
 	d.Set("user_data", outUserData.UserData)
+	d.Set("ip_type", instance.IpType)
+
+	disableApiTermination, _ := strconv.ParseBool(*outDisableApiTermination.DisableApiTermination.Value)
+	d.Set("disable_api_termination", disableApiTermination)
 
 	// only windows
 	d.Set("admin", instance.Admin)
@@ -558,7 +574,7 @@ func setInstanceResourceData(d *schema.ResourceData, meta interface{}, out *comp
 		sgs = append(sgs, *sg.GroupId)
 	}
 
-	log.Printf("[DEBUG] Setting Security Group IDs: %#v", sgs)
+	log.Printf("[DEBUG] Setting Security Group Ids: %#v", sgs)
 	if err := d.Set("security_groups", sgs); err != nil {
 		return err
 	}
