@@ -22,14 +22,22 @@ func resourceInstance() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				conn := meta.(*NifcloudClient).computingconn
-				out, _ := conn.DescribeInstances(&computing.DescribeInstancesInput{})
-				for _, i := range out.ReservationSet[0].InstancesSet {
+				out, err := conn.DescribeInstances(&computing.DescribeInstancesInput{})
+
+				if err != nil {
+					return nil, fmt.Errorf("Error Import resource: %s", err)
+				}
+
+				for _, r := range out.ReservationSet {
+					i := r.InstancesSet[0]
 					if *i.InstanceUniqueId == d.Id() {
 						d.Set("name", i.InstanceId)
+
+						return []*schema.ResourceData{d}, nil
 					}
 				}
 
-				return []*schema.ResourceData{d}, nil
+				return nil, fmt.Errorf("Error Import resource: %s", d.Id())
 			},
 		},
 
