@@ -83,16 +83,16 @@ func resourceNetworkCreate(d *schema.ResourceData, meta interface{}) error {
 
 	network := out.PrivateLan
 
-	log.Printf("[INFO] Network Id: %s", *network.PrivateLanId)
+	log.Printf("[INFO] Network Id: %s", *network.NetworkId)
 
-	d.SetId(*network.PrivateLanId)
+	d.SetId(*network.NetworkId)
 
-	log.Printf("[DEBUG] Waiting for (%s) to become running", *network.PrivateLanId)
+	log.Printf("[DEBUG] Waiting for (%s) to become running", *network.NetworkId)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"pending"},
 		Target:     []string{"running"},
-		Refresh:    NetworkStateRefreshFunc(meta, *network.PrivateLanId, []string{"terminated"}),
+		Refresh:    NetworkStateRefreshFunc(meta, *network.NetworkId, []string{"terminated"}),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 5 * time.Second,
@@ -101,7 +101,7 @@ func resourceNetworkCreate(d *schema.ResourceData, meta interface{}) error {
 	if _, err := stateConf.WaitForState(); err != nil {
 		return fmt.Errorf(
 			"Error waiting for (%s) to become ready: %s",
-			*network.PrivateLanId, err)
+			*network.NetworkId, err)
 	}
 
 	return resourceInstanceRead(d, meta)
