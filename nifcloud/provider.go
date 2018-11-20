@@ -38,6 +38,7 @@ func Provider() terraform.ResourceProvider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"nifcloud_instance": resourceInstance(),
+			"nifcloud_network":  resourceNetwork(),
 			"nifcloud_keypair":  resourceKeyPair(),
 		},
 		ConfigureFunc: providerConfigure,
@@ -48,7 +49,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := &Config{
 		AccessKey: d.Get("access_key").(string),
 		SecretKey: d.Get("secret_key").(string),
-		Endpoint:    d.Get("endpoint").(string),
+		Endpoint:  d.Get("endpoint").(string),
 		Region:    d.Get("region").(string),
 	}
 
