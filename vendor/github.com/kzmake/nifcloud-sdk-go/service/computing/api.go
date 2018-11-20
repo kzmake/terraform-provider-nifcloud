@@ -34073,7 +34073,7 @@ type PrivateLan struct {
 
 	InstancesSet []*InstancesSetItem `locationName:"instancesSet" locationNameList:"item" type:"list"`
 
-	PrivateLanId *string `locationName:"privateLanId" type:"string"`
+	NetworkId *string `locationName:"networkId" type:"string"`
 
 	PrivateLanName *string `locationName:"privateLanName" type:"string"`
 
@@ -34144,9 +34144,9 @@ func (s *PrivateLan) SetInstancesSet(v []*InstancesSetItem) *PrivateLan {
 	return s
 }
 
-// SetPrivateLanId sets the PrivateLanId field's value.
-func (s *PrivateLan) SetPrivateLanId(v string) *PrivateLan {
-	s.PrivateLanId = &v
+// SetNetworkId sets the NetworkId field's value.
+func (s *PrivateLan) SetNetworkId(v string) *PrivateLan {
+	s.NetworkId = &v
 	return s
 }
 

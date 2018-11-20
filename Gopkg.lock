@@ -34,7 +34,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:808bf6068d190a78e64e25b2085813fef901f039c2e23a6b3d4f0452a6637abb"
+  digest = "1:d19d0010720a37ba1efddfdc5967cb2bab821a9df9335b72017452b5d785be99"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -72,8 +72,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "3264db248fe8d241f6949ed35e33b11c0aec3c93"
-  version = "v1.15.68"
+  revision = "f557567ff83b93530a0498d4bdb0eb616af70bb3"
+  version = "v1.15.79"
 
 [[projects]]
   branch = "master"
@@ -168,14 +168,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:724d270a4cac0945dedb8de6357625a9d976cb640d381d3dab3144cec295db26"
+  digest = "1:ff91f36d00e6942621659bdceafa78b3708f1d15cf54d8f72c1ed5e0a73227f1"
   name = "github.com/hashicorp/go-getter"
   packages = [
     ".",
     "helper/url",
   ]
   pruneopts = "UT"
-  revision = "4bda8fa99001c61db3cad96b421d4c12a81f256d"
+  revision = "bd1edc22f8ea9d71b87fbdc0c07f0afb77ae39b6"
 
 [[projects]]
   branch = "master"
@@ -245,7 +245,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0e85b7146987d600289c5bc454ddc63745e90ebc2378bbb7d7ed27034b9c0913"
+  digest = "1:f8c6767a030eb9038b4c8c58616ea7055cd2f00526608695b4a03fe4a5b6f770"
   name = "github.com/hashicorp/hcl2"
   packages = [
     "gohcl",
@@ -257,7 +257,7 @@
     "hclwrite",
   ]
   pruneopts = "UT"
-  revision = "917fbe66e76dffa8e62448fbda375b230657897f"
+  revision = "0467c0c38ca2d4197a5180c45fc29baf80dad0a0"
 
 [[projects]]
   branch = "master"
@@ -333,7 +333,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ea582e861c2afd0afc720ba073aa72ace6385e3f5261b6b948a14e4f96dbf3cf"
+  digest = "1:4931b27663922336c91156ea65daac9de0e072a119a94c16646902f64bc1dc8c"
   name = "github.com/kzmake/nifcloud-sdk-go"
   packages = [
     "internal/sdkio",
@@ -361,7 +361,7 @@
     "service/computing",
   ]
   pruneopts = "UT"
-  revision = "92ce812c901f363629ac647779f4c0d4275f1600"
+  revision = "75b4f369ed8c5ec1e8ca8ab4c12a19788c0cba41"
 
 [[projects]]
   digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
@@ -509,11 +509,11 @@
     "openpgp/s2k",
   ]
   pruneopts = "UT"
-  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
+  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
 
 [[projects]]
   branch = "master"
-  digest = "1:d5a1ab82761bb357dcc90a5ca0f5356a573686fc37f21a51adc3830b0aa48fb6"
+  digest = "1:91e16764720d5fc23def26777a8d527badeb72fbb8185d2abb45da448d2dc180"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -527,15 +527,15 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "c10e9556a7bc0e7c942242b606f0acf024ad5d6a"
+  revision = "adae6a3d119ae4890b46832a2e88a95adc62b8e7"
 
 [[projects]]
   branch = "master"
-  digest = "1:35560529f5721d65f36dc23aa15fbf7306c5091cdc3f29f65881af5031b80cc8"
+  digest = "1:44010c69a8af2745fcdc6b4c57b126b4dd3de5cb01b6a5ba97a1781a24df0886"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "9b800f95dbbc54abff0acf7ee32d88ba4e328c89"
+  revision = "ec83556a53fe16b65c452a104ea9d1e86a671852"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -566,7 +566,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "c830210a61dfaa790e1920f8d0470fc27bc2efbe"
+  revision = "b5d43981345bdb2c233eb4bf3277847b48c6fdc6"
 
 [[projects]]
   digest = "1:95550b4aa2a79019c2a832c1a7d6a5446b046e3ee8cce12a042778ac0ac47baf"
