@@ -27,10 +27,6 @@ func resourceNetwork() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"network_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -40,7 +36,6 @@ func resourceNetwork() *schema.Resource {
 			"cidr_block": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"availability_zone": {
 				Type:     schema.TypeString,
@@ -91,7 +86,7 @@ func resourceNetworkCreate(d *schema.ResourceData, meta interface{}) error {
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"pending"},
-		Target:     []string{"running"},
+		Target:     []string{"available"},
 		Refresh:    NetworkStateRefreshFunc(meta, *network.NetworkId, []string{"terminated"}),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
@@ -104,7 +99,7 @@ func resourceNetworkCreate(d *schema.ResourceData, meta interface{}) error {
 			*network.NetworkId, err)
 	}
 
-	return resourceInstanceRead(d, meta)
+	return resourceNetworkRead(d, meta)
 }
 
 func resourceNetworkDelete(d *schema.ResourceData, meta interface{}) error {
@@ -218,7 +213,7 @@ func resourceNetworkUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	return resourceInstanceRead(d, meta)
+	return resourceNetworkRead(d, meta)
 }
 
 func resourceNetworkRead(d *schema.ResourceData, meta interface{}) error {
@@ -277,7 +272,6 @@ func NetworkStateRefreshFunc(meta interface{}, networkId string, failStates []st
 func setNetworkResourceData(d *schema.ResourceData, meta interface{}, out *computing.NiftyDescribePrivateLansOutput) error {
 	network := out.PrivateLanSet[0]
 
-	d.Set("network_id", network.NetworkId)
 	d.Set("name", network.PrivateLanName)
 	d.Set("cidr_block", network.CidrBlock)
 	d.Set("availability_zone", network.AvailabilityZone)
