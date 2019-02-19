@@ -48,10 +48,6 @@ func resourceInstance() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"instance_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -473,9 +469,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*NifcloudClient).computingconn
 
-	input := computing.DescribeInstancesInput{
-		InstanceId: []*string{nifcloud.String(d.Get("name").(string))},
-	}
+	input := computing.DescribeInstancesInput{}
 
 	out, err := conn.DescribeInstances(&input)
 	if err != nil {
@@ -487,7 +481,19 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Couldn't find Instance resource: %s", err)
 	}
 
-	return setInstanceResourceData(d, meta, out)
+	instances := out.ReservationSet[0].InstancesSet
+	var instance *computing.InstancesSetItem = nil
+	for _, v := range instances {
+		if *v.InstanceUniqueId == d.Id() {
+			instance = v
+		}
+	}
+
+	if instance == nil {
+		return fmt.Errorf("Couldn't find Instance resource: %s", err)
+	}
+
+	return setInstanceResourceData(d, meta, instance)
 }
 
 func InstanceStateRefreshFunc(meta interface{}, instanceId string, failStates []string) resource.StateRefreshFunc {
@@ -522,10 +528,10 @@ func InstanceStateRefreshFunc(meta interface{}, instanceId string, failStates []
 	}
 }
 
-func setInstanceResourceData(d *schema.ResourceData, meta interface{}, out *computing.DescribeInstancesOutput) error {
+func setInstanceResourceData(d *schema.ResourceData, meta interface{}, instance *computing.InstancesSetItem) error {
 	conn := meta.(*NifcloudClient).computingconn
 
-	instance := out.ReservationSet[0].InstancesSet[0]
+	d.Set("name", instance.InstanceId)
 
 	outDisableApiTermination, err := conn.DescribeInstanceAttribute(&computing.DescribeInstanceAttributeInput{
 		InstanceId: nifcloud.String(d.Get("name").(string)),
@@ -555,9 +561,6 @@ func setInstanceResourceData(d *schema.ResourceData, meta interface{}, out *comp
 		return fmt.Errorf("Error retrieving Instance: %s", err)
 	}
 
-
-
-	d.Set("name", instance.InstanceId)
 	d.Set("image_id", instance.ImageId)
 	d.Set("instance_type", instance.InstanceType)
 	d.Set("accounting_type", instance.AccountingType)
