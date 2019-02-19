@@ -481,19 +481,19 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Couldn't find Instance resource: %s", err)
 	}
 
-	instances := out.ReservationSet[0].InstancesSet
-	var instance *computing.InstancesSetItem = nil
-	for _, v := range instances {
-		if *v.InstanceUniqueId == d.Id() {
-			instance = v
+	reservations := out.ReservationSet
+	var reservation *computing.ReservationSetItem = nil
+	for _, v := range reservations {
+		if *v.InstancesSet[0].InstanceUniqueId == d.Id() {
+			reservation = v
 		}
 	}
 
-	if instance == nil {
+	if reservation == nil {
 		return fmt.Errorf("Couldn't find Instance resource: %s", err)
 	}
 
-	return setInstanceResourceData(d, meta, instance)
+	return setInstanceResourceData(d, meta, reservation)
 }
 
 func InstanceStateRefreshFunc(meta interface{}, instanceId string, failStates []string) resource.StateRefreshFunc {
@@ -528,9 +528,10 @@ func InstanceStateRefreshFunc(meta interface{}, instanceId string, failStates []
 	}
 }
 
-func setInstanceResourceData(d *schema.ResourceData, meta interface{}, instance *computing.InstancesSetItem) error {
+func setInstanceResourceData(d *schema.ResourceData, meta interface{}, reservation *computing.ReservationSetItem) error {
 	conn := meta.(*NifcloudClient).computingconn
 
+	instance := reservation.InstancesSet[0]
 	d.Set("name", instance.InstanceId)
 
 	outDisableApiTermination, err := conn.DescribeInstanceAttribute(&computing.DescribeInstanceAttributeInput{
@@ -580,8 +581,8 @@ func setInstanceResourceData(d *schema.ResourceData, meta interface{}, instance 
 
 	d.Set("instance_state", instance.InstanceState.Name)
 
-	sgs := make([]string, 0, len(out.ReservationSet[0].GroupSet))
-	for _, sg := range out.ReservationSet[0].GroupSet {
+	sgs := make([]string, 0, len(reservation.GroupSet))
+	for _, sg := range reservation.GroupSet {
 		sgs = append(sgs, *sg.GroupId)
 	}
 
